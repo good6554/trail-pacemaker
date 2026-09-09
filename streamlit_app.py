@@ -156,7 +156,17 @@ with st.container(border=True):
 # ---------- 4. GPX 업로드 ----------
 with st.container(border=True):
     st.subheader("4. GPX 파일 업로드")
-    gpx_file = st.file_uploader("코스 GPX 파일을 선택하세요", type=["gpx"])
+    # NOTE: iOS Safari(아이폰)는 .gpx 확장자에 대한 UTI가 없어 type=["gpx"]로
+    #       필터링하면 파일 앱에서 GPX가 비활성화되어 선택이 불가능합니다.
+    #       따라서 확장자 필터를 제거하고, 업로드 후 서버 측에서 확장자를 검증합니다.
+    gpx_file = st.file_uploader(
+        "코스 GPX 파일을 선택하세요 (.gpx)",
+        type=None,
+        accept_multiple_files=False,
+    )
+    if gpx_file is not None and not gpx_file.name.lower().endswith(".gpx"):
+        st.error("GPX 파일(.gpx)만 업로드할 수 있습니다.")
+        gpx_file = None
 
 # ---------- 5. 분석 실행 ----------
 run = st.button("🏃 전략 분석 시작", type="primary", use_container_width=True)
